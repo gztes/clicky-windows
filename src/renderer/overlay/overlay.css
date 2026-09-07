@@ -1,0 +1,166 @@
+/*
+ * Styling for the cursor overlay.
+ * Colours are taken from DesignSystem.swift so the Windows build looks like
+ * the Mac one — overlayCursorBlue #3380FF on the near-black surface palette.
+ */
+
+:root {
+  --clicky-cursor-blue: #3380ff;
+  --clicky-surface: rgba(23, 25, 24, 0.92);
+  --clicky-border-subtle: rgba(55, 59, 57, 0.9);
+  --clicky-text-primary: #eceeed;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: transparent;
+  /* The window is click-through at the OS level; this stops any stray
+     text selection or context menus if that ever fails. */
+  user-select: none;
+  cursor: default;
+  font-family: "Segoe UI Variable Display", "Segoe UI", system-ui, sans-serif;
+}
+
+/*
+ * Positioned at the origin and moved with translate3d every frame. Using a
+ * transform (rather than top/left) keeps the companion on the compositor
+ * thread, so it stays smooth while the main thread is busy.
+ */
+#companion-root {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  will-change: transform;
+  transition: opacity 220ms ease;
+  opacity: 1;
+}
+
+#companion-root.is-hidden {
+  opacity: 0;
+}
+
+#cursor-triangle {
+  position: absolute;
+  top: 0;
+  left: 0;
+  filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.45));
+  transition: opacity 180ms ease;
+}
+
+/* Faded out while the spinner is up, so the two never overlap. */
+#cursor-triangle.is-dimmed {
+  opacity: 0;
+}
+
+/* ------------------------------------------------------------- waveform ---- */
+
+#companion-waveform {
+  position: absolute;
+  top: 30px;
+  left: 24px;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  height: 28px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: var(--clicky-surface);
+  border: 1px solid var(--clicky-border-subtle);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+  opacity: 0;
+  transform: scale(0.9);
+  transition: opacity 160ms ease, transform 160ms ease;
+  pointer-events: none;
+}
+
+#companion-waveform.is-visible {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.waveform-bar {
+  width: 3px;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--clicky-cursor-blue);
+  /* Height is set per-frame from the live microphone level. */
+  transition: height 60ms linear;
+}
+
+/* -------------------------------------------------------------- spinner ---- */
+
+#companion-spinner {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid rgba(51, 128, 255, 0.25);
+  border-top-color: var(--clicky-cursor-blue);
+  opacity: 0;
+  transition: opacity 160ms ease;
+  pointer-events: none;
+}
+
+#companion-spinner.is-visible {
+  opacity: 1;
+  animation: clicky-spin 720ms linear infinite;
+}
+
+@keyframes clicky-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* --------------------------------------------------------------- bubble ---- */
+
+#companion-bubble {
+  position: absolute;
+  top: 26px;
+  left: 26px;
+  max-width: 300px;
+  padding: 10px 14px;
+  border-radius: 14px;
+  background: var(--clicky-surface);
+  border: 1px solid var(--clicky-border-subtle);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  color: var(--clicky-text-primary);
+  font-size: 13px;
+  line-height: 1.45;
+  letter-spacing: 0.1px;
+  opacity: 0;
+  transform: translateY(-4px) scale(0.96);
+  transition: opacity 200ms ease, transform 200ms ease;
+  pointer-events: none;
+  backdrop-filter: blur(12px);
+}
+
+#companion-bubble.is-visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+/* Flipped to the other side of the companion when it would leave the screen. */
+#companion-bubble.is-flipped {
+  left: auto;
+  right: 26px;
+  transform-origin: right top;
+}
+
+#companion-bubble.is-above {
+  top: auto;
+  bottom: 26px;
+}

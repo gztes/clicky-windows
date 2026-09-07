@@ -1,0 +1,356 @@
+/*
+ * The tray panel's dark aesthetic, using the same tokens as DesignSystem.swift:
+ * background #101211, surfaces #171918 / #202221, borders #373B39,
+ * text #ECEEED / #ADB5B2 / #6B736F, accent #3380FF.
+ */
+
+:root {
+  --clicky-background: #101211;
+  --clicky-surface-1: #171918;
+  --clicky-surface-2: #202221;
+  --clicky-surface-3: #272a29;
+  --clicky-border-subtle: #373b39;
+  --clicky-border-strong: #444947;
+  --clicky-text-primary: #eceeed;
+  --clicky-text-secondary: #adb5b2;
+  --clicky-text-tertiary: #6b736f;
+  --clicky-accent: #3380ff;
+  --clicky-success: #34d399;
+  --clicky-warning: #ffb224;
+  --clicky-destructive-text: #ff6369;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  overflow: hidden;
+  font-family: "Segoe UI Variable Display", "Segoe UI", system-ui, sans-serif;
+  color: var(--clicky-text-primary);
+  user-select: none;
+}
+
+.is-hidden {
+  display: none !important;
+}
+
+#panel-card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  height: 100%;
+  padding: 16px;
+  border-radius: 14px;
+  border: 1px solid var(--clicky-border-subtle);
+  background: var(--clicky-background);
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.55);
+  overflow-y: auto;
+}
+
+/* --------------------------------------------------------------- header ---- */
+
+#panel-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+#panel-status-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  background: var(--clicky-text-tertiary);
+  transition: background 200ms ease, box-shadow 200ms ease;
+}
+
+/* The dot doubles as the state indicator, so it never needs extra text. */
+#panel-status-dot[data-voice-state="idle"] {
+  background: var(--clicky-success);
+}
+#panel-status-dot[data-voice-state="listening"] {
+  background: var(--clicky-accent);
+  box-shadow: 0 0 0 4px rgba(51, 128, 255, 0.18);
+}
+#panel-status-dot[data-voice-state="processing"] {
+  background: var(--clicky-warning);
+}
+#panel-status-dot[data-voice-state="responding"] {
+  background: var(--clicky-accent);
+}
+
+#panel-title {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.2px;
+}
+
+#panel-status-text {
+  font-size: 12px;
+  color: var(--clicky-text-secondary);
+}
+
+/* -------------------------------------------------------------- sections ---- */
+
+.panel-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.section-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--clicky-text-tertiary);
+}
+
+/* ------------------------------------------------------------- shortcut ---- */
+
+#shortcut-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+kbd {
+  padding: 4px 9px;
+  border-radius: 6px;
+  border: 1px solid var(--clicky-border-strong);
+  background: var(--clicky-surface-2);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--clicky-text-primary);
+}
+
+.shortcut-plus {
+  color: var(--clicky-text-tertiary);
+  font-size: 12px;
+}
+
+#shortcut-hint {
+  margin-left: 4px;
+  font-size: 12px;
+  color: var(--clicky-text-secondary);
+}
+
+/* ---------------------------------------------------------------- model ---- */
+
+#model-options {
+  display: flex;
+  gap: 8px;
+}
+
+.model-option {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 9px 10px;
+  border-radius: 9px;
+  border: 1px solid var(--clicky-border-subtle);
+  background: var(--clicky-surface-1);
+  color: var(--clicky-text-secondary);
+  font-family: inherit;
+  text-align: left;
+  /* Every interactive element gets a pointer cursor, per the repo conventions. */
+  cursor: pointer;
+  transition: background 150ms ease, border-color 150ms ease, color 150ms ease;
+}
+
+.model-option:hover {
+  background: var(--clicky-surface-2);
+  border-color: var(--clicky-border-strong);
+}
+
+.model-option.is-selected {
+  border-color: var(--clicky-accent);
+  background: rgba(51, 128, 255, 0.12);
+  color: var(--clicky-text-primary);
+}
+
+.model-name {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.model-description {
+  font-size: 11px;
+  color: var(--clicky-text-tertiary);
+}
+
+/* --------------------------------------------------------------- toggle ---- */
+
+#cursor-toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 9px;
+  border: 1px solid var(--clicky-border-subtle);
+  background: var(--clicky-surface-1);
+  cursor: pointer;
+  transition: background 150ms ease;
+}
+
+#cursor-toggle-row:hover {
+  background: var(--clicky-surface-2);
+}
+
+.toggle-title {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.toggle-subtitle {
+  display: block;
+  margin-top: 1px;
+  font-size: 11px;
+  color: var(--clicky-text-tertiary);
+}
+
+/* The real checkbox is hidden but still focusable for keyboard users. */
+#cursor-toggle-input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggle-track {
+  position: relative;
+  flex-shrink: 0;
+  width: 38px;
+  height: 22px;
+  border-radius: 999px;
+  background: var(--clicky-surface-3);
+  border: 1px solid var(--clicky-border-strong);
+  transition: background 180ms ease, border-color 180ms ease;
+}
+
+.toggle-thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--clicky-text-secondary);
+  transition: transform 180ms ease, background 180ms ease;
+}
+
+#cursor-toggle-input:checked ~ .toggle-track {
+  background: rgba(51, 128, 255, 0.35);
+  border-color: var(--clicky-accent);
+}
+
+#cursor-toggle-input:checked ~ .toggle-track .toggle-thumb {
+  transform: translateX(16px);
+  background: var(--clicky-accent);
+}
+
+#cursor-toggle-input:focus-visible ~ .toggle-track {
+  outline: 2px solid var(--clicky-accent);
+  outline-offset: 2px;
+}
+
+/* -------------------------------------------------------------- notices ---- */
+
+.notice-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--clicky-warning);
+}
+
+.notice-body {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--clicky-text-secondary);
+}
+
+code {
+  padding: 1px 4px;
+  border-radius: 4px;
+  background: var(--clicky-surface-2);
+  font-family: "Cascadia Mono", Consolas, monospace;
+  font-size: 11px;
+  color: #9dc2ff;
+}
+
+#transcript-text {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--clicky-text-secondary);
+  font-style: italic;
+}
+
+#error-text {
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--clicky-destructive-text);
+  /* Error text is the one place long unbroken strings (URLs, stack text)
+     can appear, so let it wrap rather than widen the panel. */
+  overflow-wrap: anywhere;
+}
+
+/* --------------------------------------------------------------- footer ---- */
+
+#panel-footer {
+  margin-top: auto;
+  padding-top: 4px;
+}
+
+.secondary-button {
+  width: 100%;
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--clicky-border-subtle);
+  background: var(--clicky-surface-1);
+  color: var(--clicky-text-secondary);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 150ms ease, color 150ms ease, border-color 150ms ease;
+}
+
+.secondary-button:hover {
+  background: var(--clicky-surface-2);
+  border-color: var(--clicky-border-strong);
+  color: var(--clicky-text-primary);
+}
+
+/* ------------------------------------------- speech model download ---- */
+
+#speech-model-progress-track {
+  width: 100%;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--clicky-surface-3);
+  overflow: hidden;
+}
+
+#speech-model-progress-fill {
+  height: 100%;
+  width: 0%;
+  border-radius: 999px;
+  background: var(--clicky-accent);
+  transition: width 240ms ease;
+}
+
+#voice-source-text {
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--clicky-text-secondary);
+}

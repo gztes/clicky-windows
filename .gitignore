@@ -1,0 +1,10 @@
+node_modules/
+dist/
+worker/node_modules/
+worker/.dev.vars
+assets/trayIcon.png
+release/
+*.log
+
+# Local API keys — never commit these.
+.env

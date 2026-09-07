@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'"
+    />
+    <title>Clicky</title>
+    <link rel="stylesheet" href="panel.css" />
+  </head>
+  <body>
+    <div id="panel-card">
+      <header id="panel-header">
+        <div id="panel-status-dot"></div>
+        <div>
+          <h1 id="panel-title">Clicky</h1>
+          <p id="panel-status-text">Ready</p>
+        </div>
+      </header>
+
+      <!-- Shown until an Anthropic API key is available. -->
+      <section id="setup-notice" class="panel-section is-hidden">
+        <p class="notice-title">Finish setup</p>
+        <p class="notice-body">
+          Clicky needs an Anthropic API key. Put
+          <code>ANTHROPIC_API_KEY=sk-ant-...</code> in a <code>.env</code> file
+          next to the app. Note this is API credit from
+          <code>console.anthropic.com</code>, not a Claude subscription.
+        </p>
+      </section>
+
+      <!-- Whisper model download progress, on first run only. -->
+      <section id="speech-model-notice" class="panel-section is-hidden">
+        <p class="notice-title" id="speech-model-title">Downloading speech model</p>
+        <p class="notice-body" id="speech-model-body">
+          One-off download. Speech runs on your machine after this, offline.
+        </p>
+        <div id="speech-model-progress-track">
+          <div id="speech-model-progress-fill"></div>
+        </div>
+      </section>
+
+      <!-- Shown when the microphone isn't available yet. -->
+      <section id="microphone-notice" class="panel-section is-hidden">
+        <p class="notice-title">Microphone blocked</p>
+        <p class="notice-body">
+          Windows is not letting Clicky hear you. Allow microphone access for
+          desktop apps, then try again.
+        </p>
+        <button id="retry-microphone-button" class="secondary-button" type="button">
+          Check again
+        </button>
+      </section>
+
+      <section class="panel-section">
+        <p class="section-label">Push to talk</p>
+        <div id="shortcut-row">
+          <kbd>Ctrl</kbd>
+          <span class="shortcut-plus">+</span>
+          <kbd>Alt</kbd>
+          <span id="shortcut-hint">hold, then speak</span>
+        </div>
+      </section>
+
+      <section class="panel-section">
+        <p class="section-label">Model</p>
+        <div id="model-options"></div>
+      </section>
+
+      <section class="panel-section">
+        <label id="cursor-toggle-row" for="cursor-toggle-input">
+          <span>
+            <span class="toggle-title">Show Clicky</span>
+            <span class="toggle-subtitle">Keep the cursor on screen</span>
+          </span>
+          <input id="cursor-toggle-input" type="checkbox" />
+          <span class="toggle-track"><span class="toggle-thumb"></span></span>
+        </label>
+      </section>
+
+      <section class="panel-section">
+        <p class="section-label">Voice</p>
+        <p id="voice-source-text"></p>
+      </section>
+
+      <!-- Last thing heard, useful for confirming the mic is working. -->
+      <section id="transcript-section" class="panel-section is-hidden">
+        <p class="section-label">Last heard</p>
+        <p id="transcript-text"></p>
+      </section>
+
+      <section id="error-section" class="panel-section is-hidden">
+        <p id="error-text"></p>
+      </section>
+
+      <footer id="panel-footer">
+        <button id="quit-button" class="secondary-button" type="button">Quit Clicky</button>
+      </footer>
+    </div>
+
+    <script src="panel.js"></script>
+  </body>
+</html>

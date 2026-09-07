@@ -1,0 +1,30 @@
+{
+  "name": "clicky-win",
+  "version": "0.1.0",
+  "description": "Clicky for Windows — an AI companion that lives next to your cursor, sees your screen, talks to you, and points at things.",
+  "main": "dist/main/index.js",
+  "private": true,
+  "scripts": {
+    "generate-icons": "node scripts/generate-icons.js",
+    "copy-static": "node scripts/copy-static.js",
+    "build": "tsc -p tsconfig.main.json && tsc -p tsconfig.renderer.json && npm run build:audio && npm run copy-static",
+    "start": "npm run build && electron .",
+    "dev": "npm run build && electron . --enable-logging",
+    "typecheck": "tsc -p tsconfig.main.json --noEmit && tsc -p tsconfig.renderer.json --noEmit && tsc -p tsconfig.audio.json",
+    "build:audio": "esbuild src/renderer/audio/audio.ts --bundle --format=iife --outfile=dist/renderer/audio/audio.js --platform=browser --target=chrome128 --sourcemap",
+    "verify": "node scripts/verify-api-key.js"
+  },
+  "dependencies": {
+    "@huggingface/transformers": "^3.8.1",
+    "kokoro-js": "^1.2.1",
+    "msedge-tts": "^2.0.7",
+    "piper-tts-web": "^1.1.2",
+    "uiohook-napi": "^1.5.4"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "electron": "^33.2.1",
+    "esbuild": "^0.28.2",
+    "typescript": "^5.7.2"
+  }
+}
