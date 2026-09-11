@@ -11,96 +11,91 @@
   </head>
   <body>
     <div id="panel-card">
-      <!--
-        Row layout below matches CompanionPanelView.swift: every setting is a
-        single horizontal row (label left, value/control right), not a
-        stacked all-caps section header over its own block. That uniformity
-        is most of what makes the macOS panel read as tight and considered.
-      -->
       <header id="panel-header">
         <div id="panel-status-dot"></div>
-        <h1 id="panel-title">Clicky</h1>
-        <p id="panel-status-text">Ready</p>
+        <div>
+          <h1 id="panel-title">Clicky</h1>
+          <p id="panel-status-text">Ready</p>
+        </div>
       </header>
 
-      <div class="panel-divider"></div>
+      <!-- Shown until an Anthropic API key is available. -->
+      <section id="setup-notice" class="panel-section is-hidden">
+        <p class="notice-title">Finish setup</p>
+        <p class="notice-body">
+          Clicky needs an Anthropic API key. Put
+          <code>ANTHROPIC_API_KEY=sk-ant-...</code> in a <code>.env</code> file
+          next to the app. Note this is API credit from
+          <code>console.anthropic.com</code>, not a Claude subscription.
+        </p>
+      </section>
 
-      <div id="panel-body">
-        <!-- Shown until an Anthropic API key is available. -->
-        <section id="setup-notice" class="panel-notice is-hidden">
-          <p class="notice-title">Finish setup</p>
-          <p class="notice-body">
-            Clicky needs an Anthropic API key. Put
-            <code>ANTHROPIC_API_KEY=sk-ant-...</code> in a <code>.env</code> file
-            next to the app. Note this is API credit from
-            <code>console.anthropic.com</code>, not a Claude subscription.
-          </p>
-        </section>
-
-        <!-- Whisper model download progress, on first run only. -->
-        <section id="speech-model-notice" class="panel-notice is-hidden">
-          <p class="notice-title" id="speech-model-title">Downloading speech model</p>
-          <p class="notice-body" id="speech-model-body">
-            One-off download. Speech runs on your machine after this, offline.
-          </p>
-          <div id="speech-model-progress-track">
-            <div id="speech-model-progress-fill"></div>
-          </div>
-        </section>
-
-        <!-- Shown when the microphone isn't available yet. -->
-        <section id="microphone-notice" class="panel-notice is-hidden">
-          <p class="notice-title">Microphone blocked</p>
-          <p class="notice-body">
-            Windows is not letting Clicky hear you. Allow microphone access for
-            desktop apps, then try again.
-          </p>
-          <button id="retry-microphone-button" class="notice-action-button" type="button">
-            Check again
-          </button>
-        </section>
-
-        <div class="panel-row">
-          <span class="panel-row-label">Push to talk</span>
-          <div id="shortcut-row">
-            <kbd>Ctrl</kbd>
-            <span class="shortcut-plus">+</span>
-            <kbd>Alt</kbd>
-            <span id="shortcut-hint">hold, then speak</span>
-          </div>
+      <!-- Whisper model download progress, on first run only. -->
+      <section id="speech-model-notice" class="panel-section is-hidden">
+        <p class="notice-title" id="speech-model-title">Downloading speech model</p>
+        <p class="notice-body" id="speech-model-body">
+          One-off download. Speech runs on your machine after this, offline.
+        </p>
+        <div id="speech-model-progress-track">
+          <div id="speech-model-progress-fill"></div>
         </div>
+      </section>
 
-        <div class="panel-row">
-          <span class="panel-row-label">Model</span>
-          <div id="model-options"></div>
+      <!-- Shown when the microphone isn't available yet. -->
+      <section id="microphone-notice" class="panel-section is-hidden">
+        <p class="notice-title">Microphone blocked</p>
+        <p class="notice-body">
+          Windows is not letting Clicky hear you. Allow microphone access for
+          desktop apps, then try again.
+        </p>
+        <button id="retry-microphone-button" class="secondary-button" type="button">
+          Check again
+        </button>
+      </section>
+
+      <section class="panel-section">
+        <p class="section-label">Push to talk</p>
+        <div id="shortcut-row">
+          <kbd>Ctrl</kbd>
+          <span class="shortcut-plus">+</span>
+          <kbd>Alt</kbd>
+          <span id="shortcut-hint">hold, then speak</span>
         </div>
+      </section>
 
-        <label class="panel-row" id="cursor-toggle-row" for="cursor-toggle-input">
-          <span class="panel-row-label">Show Clicky</span>
+      <section class="panel-section">
+        <p class="section-label">Model</p>
+        <div id="model-options"></div>
+      </section>
+
+      <section class="panel-section">
+        <label id="cursor-toggle-row" for="cursor-toggle-input">
+          <span>
+            <span class="toggle-title">Show Clicky</span>
+            <span class="toggle-subtitle">Keep the cursor on screen</span>
+          </span>
           <input id="cursor-toggle-input" type="checkbox" />
           <span class="toggle-track"><span class="toggle-thumb"></span></span>
         </label>
+      </section>
 
-        <div class="panel-row">
-          <span class="panel-row-label">Voice</span>
-          <p id="voice-source-text"></p>
-        </div>
+      <section class="panel-section">
+        <p class="section-label">Voice</p>
+        <p id="voice-source-text"></p>
+      </section>
 
-        <!-- Last thing heard, useful for confirming the mic is working. -->
-        <section id="transcript-section" class="panel-block is-hidden">
-          <p class="panel-block-label">Last heard</p>
-          <p id="transcript-text"></p>
-        </section>
+      <!-- Last thing heard, useful for confirming the mic is working. -->
+      <section id="transcript-section" class="panel-section is-hidden">
+        <p class="section-label">Last heard</p>
+        <p id="transcript-text"></p>
+      </section>
 
-        <section id="error-section" class="panel-block is-hidden">
-          <p id="error-text"></p>
-        </section>
-      </div>
-
-      <div class="panel-divider"></div>
+      <section id="error-section" class="panel-section is-hidden">
+        <p id="error-text"></p>
+      </section>
 
       <footer id="panel-footer">
-        <button id="quit-button" class="text-link-button" type="button">Quit Clicky</button>
+        <button id="quit-button" class="secondary-button" type="button">Quit Clicky</button>
       </footer>
     </div>
 

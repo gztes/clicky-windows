@@ -40,24 +40,22 @@ const errorSectionElement = document.getElementById("error-section") as HTMLElem
 const errorTextElement = document.getElementById("error-text") as HTMLParagraphElement;
 const quitButton = document.getElementById("quit-button") as HTMLButtonElement;
 
-/**
- * Builds the model picker once; selection is applied on every render.
- *
- * A compact segmented pill (see #model-options in panel.css), matching
- * CompanionPanelView.swift's modelPickerRow — single-word-scale labels, no
- * description line under each one. The description isn't lost, just moved
- * to a native tooltip via `title`, so hovering still shows "faster, cheaper"
- * without the row needing to be tall enough for two lines of text.
- */
+/** Builds the model picker once; selection is applied on every render. */
 function buildModelOptions(): void {
   for (const selectableModel of SELECTABLE_CLAUDE_MODELS) {
     const modelOptionButton = document.createElement("button");
     modelOptionButton.type = "button";
     modelOptionButton.className = "model-option";
     modelOptionButton.dataset.modelIdentifier = selectableModel.identifier;
-    modelOptionButton.title = selectableModel.description;
-    // textContent, never innerHTML, so a model name can never inject markup.
-    modelOptionButton.textContent = selectableModel.displayName;
+    modelOptionButton.innerHTML = `
+      <span class="model-name"></span>
+      <span class="model-description"></span>
+    `;
+    // Set text through textContent so a model name can never inject markup.
+    (modelOptionButton.querySelector(".model-name") as HTMLElement).textContent =
+      selectableModel.displayName;
+    (modelOptionButton.querySelector(".model-description") as HTMLElement).textContent =
+      selectableModel.description;
 
     modelOptionButton.addEventListener("click", () => {
       window.clickyPanel.setSelectedModel(selectableModel.identifier);
