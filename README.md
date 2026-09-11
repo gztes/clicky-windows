@@ -115,7 +115,7 @@ empty list, so the obvious in-renderer approach silently produces no sound at
 all, while `System.Speech` on the same machine reports seven installed voices.
 That's why the Windows voice is driven from the main process by spawning
 PowerShell (`src/main/systemVoice.ts`) rather than from the renderer. Text goes
-in on stdin, never interpolated into the command — it's model output and will
+in on stdin, never interpolated into the command, it's model output and will
 contain quotes.
 
 **The legacy Windows voices are unusably robotic**, and there is no local fix:
@@ -158,7 +158,7 @@ Two things worth knowing if you touch this code:
 ## Permissions
 
 Windows needs far less hand-holding than macOS here. There is no Accessibility
-or Screen Recording consent flow — only the microphone matters:
+or Screen Recording consent flow, only the microphone matters:
 
 **Settings → Privacy & security → Microphone → Let desktop apps access your microphone**
 
@@ -251,7 +251,7 @@ worker/                     # optional Cloudflare Worker proxy (unchanged from u
 
 The audio renderer is bundled with esbuild (it imports `@huggingface/transformers`);
 the panel and overlay are plain compiled scripts with no bundler. Note the bundle
-is **IIFE, not ESM** — `<script type="module">` does not load over `file://`.
+is **IIFE, not ESM**, `<script type="module">` does not load over `file://`.
 
 ## Licence
 
