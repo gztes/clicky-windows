@@ -1,7 +1,18 @@
 /*
- * The tray panel's dark aesthetic, using the same tokens as DesignSystem.swift:
- * background #101211, surfaces #171918 / #202221, borders #373B39,
- * text #ECEEED / #ADB5B2 / #6B736F, accent #3380FF.
+ * The tray panel's dark aesthetic, ported from CompanionPanelView.swift and
+ * DesignSystem.swift on macOS.
+ *
+ * Two things the first port got wrong, now fixed to match the source:
+ *   1. --clicky-accent was #3380FF, which in DesignSystem.swift is actually
+ *      `overlayCursorBlue` — reserved for the flying screen cursor, kept
+ *      deliberately distinct from the UI accent. The panel's real accent is
+ *      Tailwind blue600/700 (#2563EB / #1D4ED8).
+ *   2. Every setting was its own stacked "ALL-CAPS LABEL" section. The Swift
+ *      view has no such pattern — Push to talk / Model / Show Clicky / Voice
+ *      are all the same single row: label on the left, value or control on
+ *      the right (see .panel-row below). That uniformity, plus real 1px
+ *      Divider() lines and a borderless dual-shadow card instead of a boxed
+ *      border, is most of what makes the native panel read as considered.
  */
 
 :root {
@@ -14,7 +25,8 @@
   --clicky-text-primary: #eceeed;
   --clicky-text-secondary: #adb5b2;
   --clicky-text-tertiary: #6b736f;
-  --clicky-accent: #3380ff;
+  --clicky-accent: #2563eb;
+  --clicky-accent-hover: #1d4ed8;
   --clicky-success: #34d399;
   --clicky-warning: #ffb224;
   --clicky-destructive-text: #ff6369;
@@ -41,17 +53,33 @@ body {
   display: none !important;
 }
 
+/*
+ * Swift relies on shadow alone for the floating-card feel (no stroke at
+ * all) because the panel sits on a vibrancy-blurred NSPanel. Windows has no
+ * equivalent blur behind it, so a hairline border at reduced opacity keeps
+ * the edge legible over an arbitrary desktop without reading as "boxed".
+ */
 #panel-card {
   display: flex;
   flex-direction: column;
   gap: 14px;
   height: 100%;
   padding: 16px;
-  border-radius: 14px;
-  border: 1px solid var(--clicky-border-subtle);
+  border-radius: 12px;
+  border: 1px solid rgba(55, 59, 57, 0.6);
   background: var(--clicky-background);
-  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.55);
+  box-shadow:
+    0 10px 20px rgba(0, 0, 0, 0.5),
+    0 2px 4px rgba(0, 0, 0, 0.3);
   overflow-y: auto;
+}
+
+/* A hairline Divider(), inset the same 16px as everything else via the
+   card's own padding — matches Divider().padding(.horizontal, 16). */
+.panel-divider {
+  flex-shrink: 0;
+  height: 1px;
+  background: var(--clicky-border-subtle);
 }
 
 /* --------------------------------------------------------------- header ---- */
@@ -59,58 +87,81 @@ body {
 #panel-header {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 
 #panel-status-dot {
-  width: 9px;
-  height: 9px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   flex-shrink: 0;
   background: var(--clicky-text-tertiary);
   transition: background 200ms ease, box-shadow 200ms ease;
 }
 
-/* The dot doubles as the state indicator, so it never needs extra text. */
+/* The dot always carries a soft glow in its own color, not just when
+   listening — Swift applies .shadow(color: statusDotColor.opacity(0.6))
+   unconditionally. */
 #panel-status-dot[data-voice-state="idle"] {
   background: var(--clicky-success);
+  box-shadow: 0 0 4px rgba(52, 211, 153, 0.6);
 }
 #panel-status-dot[data-voice-state="listening"] {
   background: var(--clicky-accent);
-  box-shadow: 0 0 0 4px rgba(51, 128, 255, 0.18);
+  box-shadow: 0 0 4px rgba(37, 99, 235, 0.6);
 }
 #panel-status-dot[data-voice-state="processing"] {
   background: var(--clicky-warning);
+  box-shadow: 0 0 4px rgba(255, 178, 36, 0.6);
 }
 #panel-status-dot[data-voice-state="responding"] {
   background: var(--clicky-accent);
+  box-shadow: 0 0 4px rgba(37, 99, 235, 0.6);
 }
 
 #panel-title {
   font-size: 14px;
   font-weight: 600;
   letter-spacing: 0.2px;
+  color: var(--clicky-text-primary);
 }
 
+/* Pushed to the far right of the header row — the CSS equivalent of the
+   Spacer() between the title group and the status text in Swift's HStack. */
 #panel-status-text {
+  margin-left: auto;
   font-size: 12px;
-  color: var(--clicky-text-secondary);
+  font-weight: 500;
+  color: var(--clicky-text-tertiary);
 }
 
-/* -------------------------------------------------------------- sections ---- */
+/* ---------------------------------------------------------------- body ---- */
 
-.panel-section {
+#panel-body {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
 }
 
-.section-label {
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.6px;
-  text-transform: uppercase;
-  color: var(--clicky-text-tertiary);
+/*
+ * The one row pattern every setting shares: label left, value/control right.
+ * This replaces the old per-section "ALL-CAPS LABEL" stacked over its own
+ * block — Swift never does that; Push to talk / Model / Show Clicky / Voice
+ * are all just this same row.
+ */
+.panel-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 2px 0;
+}
+
+.panel-row-label {
+  flex-shrink: 0;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--clicky-text-secondary);
 }
 
 /* ------------------------------------------------------------- shortcut ---- */
@@ -145,79 +196,48 @@ kbd {
 
 /* ---------------------------------------------------------------- model ---- */
 
+/* A compact segmented pill, not a pair of description cards — matches
+   Swift's modelPickerRow: a tight two-up control, single-word labels,
+   white-6%-opacity track, selected = white-10%-opacity fill. */
 #model-options {
   display: flex;
-  gap: 8px;
+  padding: 2px;
+  border-radius: 6px;
+  border: 0.5px solid var(--clicky-border-subtle);
+  background: rgba(255, 255, 255, 0.06);
 }
 
 .model-option {
   flex: 1;
   display: flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: 9px 10px;
-  border-radius: 9px;
-  border: 1px solid var(--clicky-border-subtle);
-  background: var(--clicky-surface-1);
-  color: var(--clicky-text-secondary);
+  align-items: center;
+  justify-content: center;
+  padding: 5px 10px;
+  border: none;
+  border-radius: 5px;
+  background: transparent;
+  color: var(--clicky-text-tertiary);
   font-family: inherit;
-  text-align: left;
-  /* Every interactive element gets a pointer cursor, per the repo conventions. */
+  font-size: 11px;
+  font-weight: 500;
+  white-space: nowrap;
   cursor: pointer;
-  transition: background 150ms ease, border-color 150ms ease, color 150ms ease;
+  transition: background 150ms ease, color 150ms ease;
 }
 
 .model-option:hover {
-  background: var(--clicky-surface-2);
-  border-color: var(--clicky-border-strong);
+  color: var(--clicky-text-secondary);
 }
 
 .model-option.is-selected {
-  border-color: var(--clicky-accent);
-  background: rgba(51, 128, 255, 0.12);
+  background: rgba(255, 255, 255, 0.1);
   color: var(--clicky-text-primary);
-}
-
-.model-name {
-  font-size: 12px;
-  font-weight: 600;
-}
-
-.model-description {
-  font-size: 11px;
-  color: var(--clicky-text-tertiary);
 }
 
 /* --------------------------------------------------------------- toggle ---- */
 
 #cursor-toggle-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding: 10px 12px;
-  border-radius: 9px;
-  border: 1px solid var(--clicky-border-subtle);
-  background: var(--clicky-surface-1);
   cursor: pointer;
-  transition: background 150ms ease;
-}
-
-#cursor-toggle-row:hover {
-  background: var(--clicky-surface-2);
-}
-
-.toggle-title {
-  display: block;
-  font-size: 13px;
-  font-weight: 500;
-}
-
-.toggle-subtitle {
-  display: block;
-  margin-top: 1px;
-  font-size: 11px;
-  color: var(--clicky-text-tertiary);
 }
 
 /* The real checkbox is hidden but still focusable for keyboard users. */
@@ -251,7 +271,7 @@ kbd {
 }
 
 #cursor-toggle-input:checked ~ .toggle-track {
-  background: rgba(51, 128, 255, 0.35);
+  background: rgba(37, 99, 235, 0.35);
   border-color: var(--clicky-accent);
 }
 
@@ -265,7 +285,28 @@ kbd {
   outline-offset: 2px;
 }
 
+/* ----------------------------------------------------------------- voice ---- */
+
+/* The right-hand value of the Voice row. flex + min-width: 0 lets it wrap
+   under the fixed-width label instead of overflowing the 320px card. */
+#voice-source-text {
+  flex: 1;
+  min-width: 0;
+  text-align: right;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--clicky-text-tertiary);
+}
+
 /* -------------------------------------------------------------- notices ---- */
+
+/* Plain stacked text, no card — matches permissionsCopySection, which is
+   just Text views directly on the panel background. */
+.panel-notice {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
 
 .notice-title {
   font-size: 12px;
@@ -288,6 +329,46 @@ code {
   color: #9dc2ff;
 }
 
+/* A small solid-accent capsule for an inline notice action, matching
+   Swift's "Grant" buttons (Capsule().fill(accent), 11px semibold). */
+.notice-action-button {
+  align-self: flex-start;
+  margin-top: 2px;
+  padding: 4px 10px;
+  border: none;
+  border-radius: 999px;
+  background: var(--clicky-accent);
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 150ms ease;
+}
+
+.notice-action-button:hover {
+  background: var(--clicky-accent-hover);
+}
+
+/* ------------------------------------------------------- log-like blocks ---- */
+
+/* "Last heard" and the error line read as log/transcript entries rather
+   than settings, so — unlike the row pattern above — they keep a small
+   label of their own above the content. */
+.panel-block {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.panel-block-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.4px;
+  text-transform: uppercase;
+  color: var(--clicky-text-tertiary);
+}
+
 #transcript-text {
   font-size: 12px;
   line-height: 1.5;
@@ -308,26 +389,25 @@ code {
 
 #panel-footer {
   margin-top: auto;
-  padding-top: 4px;
+  display: flex;
+  align-items: center;
 }
 
-.secondary-button {
-  width: 100%;
-  padding: 8px 12px;
-  border-radius: 8px;
-  border: 1px solid var(--clicky-border-subtle);
-  background: var(--clicky-surface-1);
-  color: var(--clicky-text-secondary);
+/* No border, no background, no full card width — just tertiary text that
+   brightens on hover, matching Swift's footerSection buttons exactly. */
+.text-link-button {
+  padding: 4px 0;
+  border: none;
+  background: none;
+  color: var(--clicky-text-tertiary);
   font-family: inherit;
   font-size: 12px;
   font-weight: 500;
   cursor: pointer;
-  transition: background 150ms ease, color 150ms ease, border-color 150ms ease;
+  transition: color 150ms ease;
 }
 
-.secondary-button:hover {
-  background: var(--clicky-surface-2);
-  border-color: var(--clicky-border-strong);
+.text-link-button:hover {
   color: var(--clicky-text-primary);
 }
 
@@ -347,10 +427,4 @@ code {
   border-radius: 999px;
   background: var(--clicky-accent);
   transition: width 240ms ease;
-}
-
-#voice-source-text {
-  font-size: 12px;
-  line-height: 1.45;
-  color: var(--clicky-text-secondary);
 }
