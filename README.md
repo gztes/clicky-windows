@@ -1,6 +1,6 @@
 # Clicky for Windows
 
-A Windows port of [Clicky](https://github.com/farzaa/clicky) — an AI companion that
+A Windows port of [Clicky](https://github.com/farzaa/clicky), an AI companion that
 lives in your system tray, sees your screen, talks to you, and points at things.
 
 The original is a macOS SwiftUI app. This is a from-scratch Electron + TypeScript
