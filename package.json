@@ -4,10 +4,15 @@
   "description": "Clicky for Windows — an AI companion that lives next to your cursor, sees your screen, talks to you, and points at things.",
   "main": "dist/main/index.js",
   "private": true,
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
+    "setup": "node scripts/setup.mjs",
+    "postinstall": "node scripts/postinstall.mjs",
     "generate-icons": "node scripts/generate-icons.js",
     "copy-static": "node scripts/copy-static.js",
-    "build": "tsc -p tsconfig.main.json && tsc -p tsconfig.renderer.json && npm run build:audio && npm run copy-static",
+    "build": "npm run generate-icons && tsc -p tsconfig.main.json && tsc -p tsconfig.renderer.json && npm run build:audio && npm run copy-static",
     "start": "npm run build && electron .",
     "dev": "npm run build && electron . --enable-logging",
     "typecheck": "tsc -p tsconfig.main.json --noEmit && tsc -p tsconfig.renderer.json --noEmit && tsc -p tsconfig.audio.json",

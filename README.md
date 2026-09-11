@@ -32,16 +32,23 @@ local, built into Windows, or optional.
 > and Claude Code. The Messages API that Clicky calls is billed separately, with
 > its own credit, on a console account. Same company, different wallet.
 
-### Run it
+### Run it — the easy way
 
-```bash
-npm install
-npm run generate-icons
+**Double-click `Start Clicky.cmd`.** The first time, it installs what's needed,
+asks you to paste your Anthropic key, offers to test it, and starts the app.
+Every time after that, it just starts. That's the whole setup.
 
-cp .env.example .env      # then put your key in it
+### Run it — from a terminal
 
+```powershell
+npm install      # generates the tray icon and a .env for you
+npm run setup    # asks for your API key, writes it to .env, offers to test it
 npm start
 ```
+
+`npm run setup` is safe to re-run and only asks for what's still missing. If you
+would rather not be prompted, put your key in `.env` by hand (copy it from
+`.env.example`) and skip straight to `npm start`.
 
 Clicky appears in the system tray — no window, no taskbar entry. Click the tray
 icon for the panel. Hold **Ctrl + Alt** and talk.
