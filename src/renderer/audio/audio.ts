@@ -213,14 +213,7 @@ async function transcribeCapturedAudio(): Promise<void> {
 
   try {
     const speechRecognitionPipeline = await loadSpeechRecognitionPipeline();
-    const recognitionResult = await speechRecognitionPipeline(samplesToTranscribe, {
-      // Small Whisper models are prone to hallucinated repetition loops —
-      // getting stuck repeating a phrase — especially on quiet or noisy audio.
-      // These discourage the decoder from looping; cleanUpRepeatedPhrases below
-      // is the backstop for when a loop gets through anyway.
-      repetition_penalty: 1.3,
-      no_repeat_ngram_size: 3,
-    });
+    const recognitionResult = await speechRecognitionPipeline(samplesToTranscribe);
 
     // The pipeline returns either one result or an array of them depending on
     // the options used; normalise both shapes to a single string.
@@ -255,48 +248,7 @@ function cleanUpWhisperOutput(rawText: string): string {
     return "";
   }
 
-  return collapseRepeatedPhrases(withoutStageDirections);
-}
-
-/**
- * Backstop for Whisper's hallucination loops: on quiet or noisy audio it can
- * get stuck repeating the same short phrase for the rest of the transcript —
- * e.g. "I'm not in my sense. I'm not in my sense. I'm not in my sense. ..."
- * `repetition_penalty`/`no_repeat_ngram_size` on the pipeline call discourage
- * this at generation time, but aren't a hard guarantee, so this catches
- * whatever gets through: if a short sentence repeats three or more times in a
- * row, keep only the first occurrence.
- */
-function collapseRepeatedPhrases(text: string): string {
-  const sentences = text.match(/[^.!?]+[.!?]*/g);
-  if (sentences === null || sentences.length < 3) {
-    return text;
-  }
-
-  const normalise = (sentence: string) => sentence.trim().toLowerCase().replace(/[.,!?]+$/, "");
-
-  const collapsed: string[] = [];
-  let previousNormalised: string | null = null;
-  let repeatRunLength = 0;
-
-  for (const sentence of sentences) {
-    const trimmed = sentence.trim();
-    if (trimmed.length === 0) continue;
-
-    const normalised = normalise(trimmed);
-    if (normalised === previousNormalised) {
-      repeatRunLength++;
-      // Drop this repeat once the same sentence has shown up 3 times in a row.
-      if (repeatRunLength >= 2) continue;
-    } else {
-      repeatRunLength = 0;
-    }
-
-    collapsed.push(trimmed);
-    previousNormalised = normalised;
-  }
-
-  return collapsed.join(" ").replace(/\s+/g, " ").trim();
+  return withoutStageDirections;
 }
 
 // ------------------------------------------------------- microphone capture
