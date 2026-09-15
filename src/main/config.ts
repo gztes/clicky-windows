@@ -287,3 +287,20 @@ export function setClickyCursorEnabled(isEnabled: boolean): void {
   settings().isClickyCursorEnabled = isEnabled;
   persistSettingsToDisk();
 }
+
+// ------------------------------------------------------------------- DAI memory
+
+/**
+ * Where DAI's markdown memory lives (the separate `dai-brain` repo's `memory/`
+ * folder, not part of this repo). Clicky reads from and appends to these files
+ * directly on the same machine; there is no DAI service to call yet. The
+ * default matches this machine's actual layout as of 2026-09-15 — override
+ * with CLICKY_DAI_MEMORY_DIR if `dai-brain` moves or this ever runs elsewhere.
+ */
+export function daiMemoryDir(): string {
+  const override = configuredValue("CLICKY_DAI_MEMORY_DIR");
+  if (override.length > 0) {
+    return override;
+  }
+  return "C:\\Users\\gonza\\OneDrive\\Projects\\Ventures\\dai-brain\\memory";
+}

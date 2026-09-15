@@ -68,7 +68,18 @@ export async function requestStreamingCompanionResponse(options: {
   modelIdentifier: string;
   abortSignal: AbortSignal;
   onTextChunk: (accumulatedText: string) => void;
+  /**
+   * What DAI (Clicky's shared memory, across all of the user's tools) knows
+   * about the user, if anything. Empty/omitted when DAI has no memory yet —
+   * Clicky's persona and behavior are otherwise unchanged.
+   */
+  daiMemoryContext?: string;
 }): Promise<string> {
+  const systemPrompt =
+    options.daiMemoryContext && options.daiMemoryContext.trim().length > 0
+      ? `${COMPANION_VOICE_RESPONSE_SYSTEM_PROMPT}\n\nwhat dai (your memory, shared across all the user's tools, not just this one) knows about the user:\n${options.daiMemoryContext.trim()}`
+      : COMPANION_VOICE_RESPONSE_SYSTEM_PROMPT;
+
   const messages: unknown[] = [];
 
   // Replay prior turns so Claude has the conversation in context. We only send
@@ -103,7 +114,7 @@ export async function requestStreamingCompanionResponse(options: {
     model: options.modelIdentifier,
     max_tokens: 1024,
     stream: true,
-    system: COMPANION_VOICE_RESPONSE_SYSTEM_PROMPT,
+    system: systemPrompt,
     messages,
   };
 

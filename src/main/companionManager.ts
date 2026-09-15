@@ -17,6 +17,7 @@ import { ipcMain, screen } from "electron";
 import { AudioWindowManager } from "./audioWindow";
 import { requestStreamingCompanionResponse, type ConversationExchange } from "./claudeClient";
 import * as config from "./config";
+import { appendDaiMemoryNote, readDaiMemoryContext } from "./daiMemory";
 import { GlobalPushToTalkMonitor } from "./globalPushToTalk";
 import { OverlayWindowManager } from "./overlayWindows";
 import { PanelWindowManager } from "./panelWindow";
@@ -275,6 +276,7 @@ export class CompanionManager {
         conversationHistory: this.conversationHistory,
         modelIdentifier: config.selectedModelIdentifier(),
         abortSignal: responseAbortController.signal,
+        daiMemoryContext: readDaiMemoryContext(),
         onTextChunk: () => {
           // The Mac deliberately shows no streaming text — the spinner stays up
           // until the voice starts. Kept identical here.
@@ -294,6 +296,10 @@ export class CompanionManager {
       if (this.conversationHistory.length > MAX_CONVERSATION_EXCHANGES) {
         this.conversationHistory = this.conversationHistory.slice(-MAX_CONVERSATION_EXCHANGES);
       }
+
+      // "Make DAI remember everything Clicky does for you" — report the exchange
+      // back to DAI's shared memory. Best-effort; never blocks or breaks the loop.
+      appendDaiMemoryNote(`[clicky] user asked: "${transcript}" — clicky replied: "${spokenText}"`);
 
       const pointingTarget = resolvePointingTarget(parseResult, capturedScreens);
 
